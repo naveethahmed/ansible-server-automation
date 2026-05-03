@@ -1,0 +1,105 @@
+---
+# Ansible Playbook - Server Configuration and Automation
+# Author: Naveeth Ahmed N
+# Description: Automates Linux server setup with Nginx, Docker and security config
+
+- name: Configure Web Server
+  hosts: all
+  become: yes
+  vars:
+    app_port: 80
+    admin_user: naveeth
+
+  tasks:
+
+    # System Update
+    - name: Update apt package cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade all packages
+      apt:
+        upgrade: yes
+
+    # Install Required Packages
+    - name: Install required packages
+      apt:
+        name:
+          - nginx
+          - curl
+          - git
+          - vim
+          - ufw
+        state: present
+
+    # Install Docker
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - software-properties-common
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+
+    # Configure Nginx
+    - name: Start and enable Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    # Configure Firewall
+    - name: Allow SSH through firewall
+      ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+
+    - name: Allow HTTP through firewall
+      ufw:
+        rule: allow
+        port: "80"
+        proto: tcp
+
+    - name: Enable UFW firewall
+      ufw:
+        state: enabled
+
+    # Deploy Simple Web Page
+    - name: Create web page
+      copy:
+        content: |
+          <html>
+          <body>
+            <h1>Server Configured by Ansible!</h1>
+            <p>Automated by Naveeth Ahmed N</p>
+          </body>
+          </html>
+        dest: /var/www/html/index.html
+        mode: '0644'
+
+    # Verify Services
+    - name: Verify Nginx is running
+      service:
+        name: nginx
+        state: started
+
+    - name: Print completion message
+      debug:
+        msg: "Server configuration completed successfully!"
