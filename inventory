@@ -1,0 +1,17 @@
+  # Ansible Inventory File
+# Author: Naveeth Ahmed N
+# Description: Defines target servers for automation
+
+[webservers]
+web1 ansible_host=10.0.1.10 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/devops-key.pem
+
+[dbservers]
+db1 ansible_host=10.0.1.20 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/devops-key.pem
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+
+# Local testing
+[local]
+localhost ansible_connection=local
